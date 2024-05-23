@@ -1,5 +1,6 @@
 from tkinter import *
-
+import requests
+from bs4 import BeautifulSoup
 import tkintermapview
 
 users:list=[]
@@ -10,6 +11,16 @@ class User:
         self.surname=surname
         self.posts=posts
         self.location=location
+        self.coords=self.get_coordinates()
+        self.marker = map_widget.set_marker(self.coords[0], self.coords[1], text=f"{self.location}")
+
+    def get_coordinates(self):
+        url: str = f"https://pl.wikipedia.org/wiki/{self.location}"
+        response = requests.get(url)
+        response_html = BeautifulSoup(response.text, "html.parser")
+        latitude = float(response_html.select(".latitude")[1].text.replace(",", ".").strip())
+        longitude = float(response_html.select(".longitude")[1].text.replace(",", ".").strip())
+        return [latitude, longitude]
 
 
 def add_new_user():
@@ -22,14 +33,15 @@ def add_new_user():
     entry_location.delete(0,END)
     entry_name.focus()
 
+
 def display_users():
     listbox_lista_uzytkownikow.delete(0,END)
     for idx,user in enumerate(users):
         listbox_lista_uzytkownikow.insert(idx, f'{idx+1}. {user.name} {user.surname}')
 
 def delete_user():
-
     print(listbox_lista_uzytkownikow.index(ACTIVE))
+    users[listbox_lista_uzytkownikow.index(ACTIVE)].marker.delete()
     users.pop(listbox_lista_uzytkownikow.index(ACTIVE))
     display_users()
 
@@ -68,6 +80,7 @@ def update_user(i):
     entry_name.focus()
 
 
+
 root=Tk()
 root.geometry('800x700')
 root.title('MapBook')
@@ -98,7 +111,7 @@ button_edytuj_uzytkownika.grid(row=2, column=2)
 
 # ramka formularz
 label_napis_formularz=Label(ramka_formularz,text='Formularz edycji i dodawania')
-label_name=Label(ramka_formularz,text='Imię')
+label_name=Label(ramka_formularz,text='Imię',)
 label_surname=Label(ramka_formularz,text='Nazwisko')
 label_posts=Label(ramka_formularz,text='Liczba postów')
 label_location=Label(ramka_formularz,text='Miejscowosc')
@@ -148,6 +161,7 @@ map_widget=tkintermapview.TkinterMapView(ramka_szczegoly_uzytkownika,width=700,h
 map_widget.grid(row=2, column=0, columnspan=8)
 map_widget.set_position(52.21,21.00)
 map_widget.set_zoom(10)
+
 
 
 root.mainloop()
