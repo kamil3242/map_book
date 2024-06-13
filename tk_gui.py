@@ -27,9 +27,9 @@ def display_users():
     for idx, user in enumerate(users):
        listbox_lista_użytkowników.insert(idx, f'{idx+1}. {user.name} {user.surname}')
 
-def delete_user():
+def delete_user()->None:
     print(listbox_lista_użytkowników.index(ACTIVE))
-    users.pop(listbox_lista_użytkowników.index(ACTIVE))
+    users.pop(users.index(ACTIVE))
     display_users()
 
 def show_user_details():
